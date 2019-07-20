@@ -152,35 +152,16 @@ int main(int argc, char* argv[]) {
     if (ipCheck(ethdr->type) == false)
     {
         //printf("Not an IP HEader");
-    }
-
+   }
 
 
     printf("\n");
-    /*
-    printf("DST MAC :");
-    for(int i=0;i<ETH_ADDR_LENGTH;i++) {
-        printf("%02x ", ethdr->dst_mac[i]);
-    }
-    printf("\n");
 
-    printf("DST MAC :");
-    for(int i=0;i<ETH_ADDR_LENGTH;i++) {
-        printf("%02x ", ethdr->src_mac[i]);
-    }
-    printf("\n");
-
-    printf("ETHERNET TYPE :");
-    printf("%02x", ethdr->type);
-    printf("\n");
-    */
-
-    //ipdr = reinterpret_cast<const ip_header*>(packet);
     ipdr = reinterpret_cast<const ip_header*>(packet+sizeof(struct eth_header));
     packet_size = htons(ipdr->packet_len);
     ip_size = (ipdr->version&0x0F)*4;
 
-    //printf("ETH size : %d\n", sizeof(ethdr));
+
 
     if (tcpCheck(ipdr->protocol_id))
     {
@@ -188,30 +169,15 @@ int main(int argc, char* argv[]) {
     }
 
 
-    //printf("\n");
-    /*
-    printf("VER : %02x\n", ipdr->version);
-    printf("tos : %02x\n", ipdr->tos);
-    printf("Packet Length : %d\n", ipdr->ip_len);
-    printf("Packet Length : %u\n", ipdr->ip_len);
-    printf("Packet Length : %x\n", ipdr->ip_len);
-    printf("id : %02x\n", ipdr->id);
-    printf("ttl : %02x\n", ipdr->ttl);
-    */
 
-    //printf("src_ip : %s\n", inet_ntoa(ipdr->src_ip));
-    //printf("dst_ip : %s\n", inet_ntoa(ipdr->dst_ip));
-    //printf("\n");
 
     tcpdr = reinterpret_cast<const tcp_header*>(packet+sizeof(struct eth_header)+sizeof(ip_header));
     int tcp_size = ((tcpdr->header_len&0xF0)>>4)*4;
+    int option_size = tcp_size - 20;
+    int eth_size = sizeof(ethdr)*4;
 
-    //printf("packet_size : %d byte\n",packet_size);
-    //printf("ip_size : %d byte\n", ip_size);
-    //printf("tcp_size : %d byte\n", tcp_size);
     tcp_data_size = packet_size - (ip_size + tcp_size);
 
-    //printf("TCP DATA_size : %d\n", tcp_data_size);
 
     for(int i=0;i<ETH_ADDR_LENGTH;i++) {
         printf("%02x", ethdr->src_mac[i]);
@@ -238,12 +204,11 @@ int main(int argc, char* argv[]) {
 
     if (tcp_data_size > 0)
     {
-        const unsigned char *tcp_data = reinterpret_cast<const unsigned char*>(packet+sizeof(struct eth_header)+sizeof(ip_header)+ sizeof(tcp_header)+10);
+        const unsigned char *tcp_data = reinterpret_cast<const unsigned char*>(packet+sizeof(struct eth_header)+sizeof(ip_header)+ tcp_size);
         if (tcp_data_size > 10)
         {
             tcp_data_size = 10;
         }
-            //printHex(tcp_data_size, tcp_data);
 
         for(int i=0;i<tcp_data_size;i++)
         {
@@ -251,23 +216,7 @@ int main(int argc, char* argv[]) {
         }
     }
     printf("\n");
-    //printf("tcp_size : %d\n", (ipdr->version&0x0F)<<4);
 
-    //printf("Header Length : %d\n", tcp_size);
-    //printf("src_port :%d\n", htons(tcpdr->src_port));
-    //printf("dst_port :%d\n", htons(tcpdr->dst_port));
-    /*
-    printf("SRC IP :");
-    for(int j=0; j<IP_VERSION; j++)
-    {
-        printf("%d ", ipdr->version[j]);
-    }
-    */
-
-
-
-    //printf("%u bytes captured\n", header->caplen);
-    //printHex(header->caplen, packet);
 
     struct tm *req_time;
     req_time = localtime(&header->ts.tv_sec);
