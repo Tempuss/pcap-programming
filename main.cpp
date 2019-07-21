@@ -86,6 +86,35 @@ void printHex(int length, const u_char* packet ) {
 
 /**
  * @brief ipCheck
+ * @param type
+ * @return bool
+ */
+bool ipCheck(u_int16_t type) {
+    if (type == 8)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @brief tcpCheck
+ * @param protocol
+ * @return bool
+ */
+bool tcpCheck(u_int8_t protocol)
+{
+    if (protocol == 6)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @brief ipCheck
  * @detail Check that IP Header Exists
  * @param type
  * @return
@@ -106,7 +135,7 @@ bool headerCheck(int size)
  * @param in_addr ip
  */
 void printValue(in_addr ip) {
-    printf("%s:", inet_ntoa(ip));
+    printf(" %s", inet_ntoa(ip));
 }
 
 /**
@@ -115,7 +144,7 @@ void printValue(in_addr ip) {
  * @param int port
  */
 void printValue(int port) {
-    printf("%d ", port);
+    printf(":%d ", port);
 }
 
 
@@ -166,6 +195,7 @@ int main(int argc, char* argv[]) {
     int ip_size = 0;
     int tcp_data_size = 0;
     int tcp_size = 0;
+    int option_size = 0;
     int eth_size = 0;
 
     if (res == 0) continue;
@@ -181,8 +211,12 @@ int main(int argc, char* argv[]) {
     packet_size = htons(ipdr->packet_len);
     ip_size = (ipdr->version&0x0F)*4;
 
-    //Check Next IP Header Size
-    if (headerCheck(ip_size) == true)
+    printValue(ethdr->src_mac);
+    printValue(ethdr->dst_mac);
+
+
+    //Check Next IP Header
+    if (ipCheck(ethdr->type) == true)
     {
 
         //Get TCP Header From Packet
@@ -192,15 +226,12 @@ int main(int argc, char* argv[]) {
         tcp_size = ((tcpdr->header_len&0xF0)>>4)*4;
 
         //Check Next Tcp Header
-        if (headerCheck(tcp_size) == true)
+        if (tcpCheck(ipdr->protocol_id) == true)
         {
             eth_size = sizeof(ethdr)*4;
 
             //Printable TCP Data Size
             tcp_data_size = packet_size - (ip_size + tcp_size);
-
-            printValue(ethdr->src_mac);
-            printValue(ethdr->dst_mac);
 
             printValue(ipdr->src_ip);
             printValue(tcpdr->src_port);
@@ -209,15 +240,19 @@ int main(int argc, char* argv[]) {
             printValue(tcpdr->dst_port);
 
             //Check TCP Data Exists
-
+            if (tcp_data_size > 0)
             {
                 //Get TCP Data from Packet
                 tcp_data = (u_char*)(packet+sizeof(struct eth_header)+sizeof(ip_header)+ tcp_size);
                 printValue(tcp_data);
             }
         }
-        printf("\n");
+        else {
+            printValue(ipdr->src_ip);
+            printValue(ipdr->dst_ip);
+        }
     }
+    printf("\n");
 
   }
 
