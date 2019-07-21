@@ -114,22 +114,6 @@ bool tcpCheck(u_int8_t protocol)
 }
 
 /**
- * @brief ipCheck
- * @detail Check that IP Header Exists
- * @param type
- * @return
- */
-bool headerCheck(int size)
-{
-    if (size == 20)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-/**
  * @brief printValue
  * @detail Print IP Format Data
  * @param in_addr ip
