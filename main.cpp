@@ -1,11 +1,6 @@
 #include <pcap.h>
 #include <stdio.h>
-#include <time.h>
-#include <string.h>
 #include <arpa/inet.h>
-#include <typeinfo>
-#include <iostream>
-#include <sstream>
 #define ETH_ADDR_LENGTH 0x6
 
 /**
