@@ -20,3 +20,8 @@ make
 tcpreplay -i {NetworkInterFace} {NetworkPcapFile}
 
 ```
+
+* HTTP Debug
+```
+curl --trace trace.txt -I 10.0.2.15/_health
+```
